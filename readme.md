@@ -74,7 +74,7 @@ Implementation of the internal clients used in communication with the external A
 diagram. Example shown below relates to ```NationalizeClient```, but the similar approach applies to communication with
 the other two APIs.
 
-![client_implementation](./uml/client_implementation.png)
+![client_implementation](./uml/client_implementation_2.png)
 
 As shown on the diagram, cache can be also populated with null values. It is a valid case, where it means that application 
 should not take any more attempts to retrieve details from external API.
