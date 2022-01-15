@@ -24,7 +24,7 @@ else Entry not found
     client -> api: GET https://api.nationalize.io/?name=**first_name**
     activate api
 
-    loop Until response == 200 or attemptCount >= 3
+    loop While response != 200 or attemptCount <= 3
         alt
             api --> client: HTTP 200 with valid result
             client -> client: Extract **nationality** with highest **probability**
