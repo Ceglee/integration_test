@@ -1,0 +1,64 @@
+@startuml
+control UserDetailsService as service
+entity UserDetails as userDetails
+control NationalizeClient as client
+collections Cache as cache
+boundary "Nationalize API" as api
+
+activate service
+activate userDetails
+activate cache
+
+service ->> client: Retrieve **nationality**
+
+activate client
+client -> cache: Get **nationality** for **first_name**
+
+alt Entry exists
+    cache --> client: **nationality**
+    client -->> userDetails: Set **nationality**
+
+else Entry not found
+    cache --> client: null
+
+    client -> api: GET https://api.nationalize.io/?name=**first_name**
+    activate api
+
+    loop Until response == 200 or attemptCount >= 3
+        alt
+            api --> client: HTTP 200 with valid result
+            client -> client: Extract **nationality** with highest **probability**
+            client -> cache: Put entry (**first_name**, **nationality**)
+            client -->> userDetails: Set **nationality**
+
+        else
+            api --> client: HTTP 200 with no results
+            client -> cache: Put entry (**first_name**, null)
+            client -->> userDetails: Set null
+
+        else
+            api --> client: HTTP 4xx
+            client -> client: **attemptCount** = 3
+            client -> cache: Put entry (**first_name**, null)
+            client -->> userDetails: Set null
+
+        else
+            api --> client: HTTP 5xx or service unavailable
+            deactivate api
+            client -> client: **attemptCount**++
+            opt attemptCount >= 3
+                client -->> userDetails: Set null
+            end
+            deactivate client
+        end
+    end
+
+    deactivate client
+end
+
+
+
+
+
+
+@enduml

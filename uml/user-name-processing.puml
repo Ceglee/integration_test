@@ -1,0 +1,20 @@
+@startuml
+skinparam linetype ortho
+
+start
+:Split **user_name** by " " (space);
+
+if (Split array size == 1) then (yes)
+    :**first_name** = array[0];
+
+(no) elseif (Split array size == 2)
+    :**first_name** = array[0]\n**last_name** = array[1];
+
+else (no)
+    :**first_name** = array[0]\n**last_name** = array[array.length - 1];
+
+endif
+
+stop
+
+@enduml

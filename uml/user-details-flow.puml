@@ -1,0 +1,73 @@
+@startuml
+actor "Auction service" as auctionService
+boundary UserDetailsEndpoint as endpoint
+control UserDetailsService as service
+entity UserDetails as userDetails
+control NationalizeClient as nationalize
+control GenderizeClient as genderize
+control AgifyClient as agify
+
+activate auctionService
+
+auctionService -> endpoint: HTTP POST /user-details
+activate endpoint
+
+endpoint -> endpoint: Validate **user_name**
+
+alt user_name is null or empty
+    endpoint --> auctionService: HTTP 422
+
+else user_name is valid
+    endpoint -> service: Get user details
+    activate service
+
+    service -> service: Extract **first_name** and **last_name**
+    alt Unable to extract **first_name** and **last_name**
+        service --> endpoint: null
+        endpoint --> auctionService: HTTP **204**
+
+    else
+        service -> userDetails: Create **UserDetails**
+        activate userDetails
+
+        service -> userDetails: set **first_name** and **last_name**
+        loop While time less than 10 ms or any task is still pending.
+            par
+                service ->> nationalize: Retrieve **nationality**
+                activate nationalize
+
+                note right: Implementation details omitted
+
+                nationalize -->> userDetails: set **nationality**
+                deactivate nationalize
+
+            else
+                service ->> genderize: Retrieve **gender**
+                activate genderize
+
+                note right: Implementation details omitted
+
+                genderize -->> userDetails: set **gender**
+                deactivate genderize
+
+            else
+                service ->> agify: Retrieve **age**
+                activate agify
+
+                note right: Implementation details omitted
+
+                agify -->> userDetails: set **age**
+                deactivate agify
+            end
+        end loop
+
+        service --> endpoint: **UserDetails**
+        deactivate service
+
+        endpoint --> auctionService: HTTP **200** with **UserDetails** json
+        destroy  userDetails
+        deactivate endpoint
+    end
+end
+
+@enduml
