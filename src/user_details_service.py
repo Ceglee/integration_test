@@ -1,9 +1,12 @@
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
-
+from agify_client import AgifyApiClient
+from genderize_client import GenderizeApiClient
 from nationalize_client import NationalizeApiClient
 
-NATIONALIZE_API_CLIENT = NationalizeApiClient("nationality")
+NATIONALIZE_API_CLIENT = NationalizeApiClient()
+GENDERIZE_API_CLIENT = GenderizeApiClient()
+AGIFY_API_CLIENT = AgifyApiClient()
 
 
 class UserDetailsService:
@@ -12,10 +15,18 @@ class UserDetailsService:
         start = time.time_ns()
         user_details = self._init_user_details(user_name)
         executor = ThreadPoolExecutor(max_workers=3)
+
         try:
-            future = executor.submit(lambda: NATIONALIZE_API_CLIENT.enhance_user_data(user_details, user_details["first_name"]))
+            first_name = user_details["first_name"]
+            futures = [
+                executor.submit(lambda: NATIONALIZE_API_CLIENT.enhance_user_data(user_details, first_name)),
+                executor.submit(lambda: GENDERIZE_API_CLIENT.enhance_user_data(user_details, first_name)),
+                executor.submit(lambda: AGIFY_API_CLIENT.enhance_user_data(user_details, first_name))
+            ]
+
             while time.time_ns() - start < 10_000_000:
-                if future.done():
+                finished = all(map(lambda future: future.done(), futures))
+                if finished:
                     return user_details
         finally:
             executor.shutdown(False)

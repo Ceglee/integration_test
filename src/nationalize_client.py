@@ -5,6 +5,7 @@ from api_client import ApiClient
 class NationalizeApiClient(ApiClient):
     URL = "https://api.nationalize.io/"
     PARAM_NAME = "name"
+    PROPERTY_NAME = "nationality"
 
     def _handle_response(self, json):
         countries = json.get("country")
@@ -18,6 +19,9 @@ class NationalizeApiClient(ApiClient):
 
     def _get_param_name(self):
         return self.PARAM_NAME
+
+    def _get_property_name(self):
+        return self.PROPERTY_NAME
 
     @staticmethod
     def _compare_countries(country_1, country_2):
