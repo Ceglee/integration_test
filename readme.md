@@ -13,6 +13,17 @@ Main reason standing behind the project is to extend user details with following
 * gender
 * age 
 
+## How to run the project
+In root folder download required dependencies using following command:
+```
+pip install -r requirements.txt
+```
+
+Next got to `/src` folder and start the server:
+```
+flask run
+```
+
 ## Implementation
 New API has to be created. It will reside in a standalone, dedicated http server, where whole solution will be 
 written in python language.
