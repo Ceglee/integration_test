@@ -14,7 +14,7 @@ class UserDetailsService:
         executor = ThreadPoolExecutor(max_workers=3)
         try:
             future = executor.submit(lambda: NATIONALIZE_API_CLIENT.enhance_user_data(user_details, user_details["first_name"]))
-            while time.time_ns() - start < 10:
+            while time.time_ns() - start < 10_000_000:
                 if future.done():
                     return user_details
         finally:
