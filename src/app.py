@@ -10,16 +10,19 @@ USER_DETAILS_SERVICE = UserDetailsService()
 @app.route("/", methods=["POST"])
 def get_user_details():
     if validate(request.json):
-        return USER_DETAILS_SERVICE.get_user_details(request.json["user_name"]).__dict__
+        user_details = USER_DETAILS_SERVICE.get_user_details(request.json["user_name"])
+
+        if user_details is None:
+            return Response(response=json.dumps({"message": "Unable to retrieve user details."}), status=204, mimetype='application/json')
+
+        else:
+            return user_details
 
     else:
         return Response(response=json.dumps({"message": "Required user_name value is invalid."}), status=422, mimetype='application/json')
 
 
 def validate(json):
+    user_name = json.get("user_name")
+    return user_name is not None and isinstance(user_name, str) and user_name
 
-    if "user_name" in json:
-        user_name = request.json["user_name"]
-        return user_name is not None and isinstance(user_name, str) and user_name
-
-    return False
