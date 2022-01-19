@@ -24,5 +24,5 @@ def get_user_details():
 
 def validate(json):
     user_name = json.get("user_name")
-    return user_name is not None and isinstance(user_name, str) and user_name
+    return user_name and isinstance(user_name, str) and user_name.strip()
 
