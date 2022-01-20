@@ -8,13 +8,14 @@ class ApiClient:
     def __init__(self):
         self.cache = {}
 
+    def hit_cache(self, user_data, param_value):
+        if param_value in self.cache:
+            user_data[self._get_property_name()] = self.cache.get(param_value)
+            return True
+
+        return False
+
     def enhance_user_data(self, user_data, param_value):
-        value = self.cache.get(param_value)
-
-        if value:
-            user_data[self._get_property_name()] = value
-            return
-
         response = requests.get(self._get_url(), {self._get_param_name(): param_value})
         status_code = response.status_code
 

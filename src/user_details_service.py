@@ -18,14 +18,19 @@ class UserDetailsService:
 
         try:
             first_name = user_details["first_name"]
-            futures = [
-                executor.submit(lambda: NATIONALIZE_API_CLIENT.enhance_user_data(user_details, first_name)),
-                executor.submit(lambda: GENDERIZE_API_CLIENT.enhance_user_data(user_details, first_name)),
-                executor.submit(lambda: AGIFY_API_CLIENT.enhance_user_data(user_details, first_name))
-            ]
+            futures = []
+
+            if not NATIONALIZE_API_CLIENT.hit_cache(user_details, first_name):
+                futures.append(executor.submit(lambda: NATIONALIZE_API_CLIENT.enhance_user_data(user_details, first_name)))
+
+            if not GENDERIZE_API_CLIENT.hit_cache(user_details, first_name):
+                futures.append(executor.submit(lambda: GENDERIZE_API_CLIENT.enhance_user_data(user_details, first_name)))
+
+            if not AGIFY_API_CLIENT.hit_cache(user_details, first_name):
+                futures.append(executor.submit(lambda: AGIFY_API_CLIENT.enhance_user_data(user_details, first_name)))
 
             while time.time_ns() - start < 10_000_000:
-                finished = all(map(lambda future: future.done(), futures))
+                finished = len(futures) == 0 or all(map(lambda future: future.done(), futures))
                 if finished:
                     return user_details
         finally:
