@@ -34,6 +34,9 @@ class ApiClient:
             elif status_code >= 500:
                 attempt += 1
 
+            else:
+                return
+
     def _handle_response(self, json):
         raise NotImplementedError(IMPLEMENTATION_ERROR_MESSAGE)
 
